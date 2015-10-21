@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="UIWebViewBounce" value="false" />
+
+    <link rel="stylesheet" type="text/css" href="css/normalize.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/foundation.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+</head>
+
+<body>
+    <div class="content" style="margin-top:23px;">
+        <div class="row">
+            <div class="small-11 small-centered columns">
+                <h3>Sticker Scanner</h3>
+                <form id="menagerie">
+                    <label>Location Id
+                        <input id="location" name="locationId" type="text" placeholder="Location Id"
+                        required pattern="^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$"/>
+                    </label>
+                    <label>MAC Address
+                        <input id="device" name="deviceId" type="text" placeholder="MAC"
+                        required pattern="^([0-9A-Fa-f]{2}[:-]?){5}([0-9A-Fa-f]{2})$"/>
+                    </label>
+                    <label>Asset Tag
+                        <input id="assetTag" name="assetId" type="text" placeholder="Asset Tag"
+                        required pattern="[0-9]{6}"/>
+                    </label>
+                    <div id="toolbar" class="row hidden">
+                        <div class="small-6 columns">
+                            <button id="clear" type="reset" class="expand info radius small">Clear</button>
+                        </div>
+                        <div class="small-6 columns">
+                            <button id="submit" type="submit" class="expand small radius">Send</button>
+                        </div>
+                    </div>
+                </form>
+                <div id="results" class="panel"></div>
+                <button id="startScan" class="radius success expand">Scan</button>
+                <!-- <div id="results-zbar" class="panel"></div> -->
+            </div>
+        </div>
+
+        <script type="text/javascript" src="cordova.js"></script>
+        <!-- <script type="text/javascript" src="js/sails.io.js"></script> -->
+        <script type="text/javascript" src="js/socket.io.js"></script>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/foundation.min.js"></script>
+        <script type="text/javascript" src="js/app.js"></script>
+</body>
+
+</html>

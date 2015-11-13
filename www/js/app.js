@@ -1,12 +1,11 @@
 var resultDiv, resultZbar, socket, _device, _location, _assetTag, _form;
 
-var IP = '10.31.70.86',
+var IP = '127.0.0.1',
 	PORT= '1337',
 	SERVER_URL = 'http://' + IP + ':' + PORT,
 	ENDPOINT = '/thing/barcode-scann';
 
-
-SERVER_URL = 'http://menagerie.ngrok.io';
+var WEB_APP_TOKEN = '<TOKEN>';
 
 var isPhoneGap = ! /^http/.test(document.location.protocol);
 
@@ -23,8 +22,6 @@ var validations = {
 
 function init()
 {
-
-
 	var eventType = isPhoneGap ? 'touchend' : 'mouseclick';
 	document.querySelector("#clear").addEventListener(eventType, _clear, false);
 	document.querySelector("#startScan").addEventListener(eventType, startScan, false);
@@ -41,7 +38,6 @@ function init()
 	_assetTag = $('#assetTag');
 
 	console.log('URL', SERVER_URL);
-	console.log('WS', 'ws://' + SERVER_URL);
 
 	$('#menagerie').submit(function(e){
 		e.preventDefault();
@@ -135,7 +131,9 @@ function updateUI(){
 function notifyReading(endpoint, payload){
 	console.log('=> NOTIFY READING', endpoint, JSON.stringify(payload));
 
-	socket.emit('scanner/barcode', payload);
+	socket.emit('/thing/socketes', payload);
+
+    resultDiv.innerHTML = endpoint;
 
 	$.ajax({
 		url: endpoint,
@@ -143,19 +141,28 @@ function notifyReading(endpoint, payload){
 		type: "POST",
         crossDomain: true,
         dataType: "json",
-	}).done(function(a){
-		console.log('DONE ', JSON.stringify(a));
-		resultDiv.innerHTML = 'Transaction complete';
+        beforeSend : setAuthorizationToken
+	}).done(function(res){
+		console.log('AJAX response: ', JSON.stringify(res));
+        if(res.success) resultDiv.innerHTML = 'Transaction complete';
+        else resultDiv.innerHTML = res.message;
 	}).fail(function(e){
 		console.error('ERROR %s', e, JSON.stringify(e));
 		resultDiv.innerHTML = '<h4>Error</h4><br/><code>' + JSON.stringify(e, null, 4) + '</code>';
 	}).always(function(){
 		updateUI();
 	});
-	resultDiv.innerHTML = endpoint;
+
 	console.log('POST', endpoint, JSON.stringify(payload));
 }
 
+function getToken(){
+    console.log('WEB APP TOKEN', WEB_APP_TOKEN);
+    return "Bearer " + WEB_APP_TOKEN;
+}
+function setAuthorizationToken(xhr){
+    xhr.setRequestHeader("Authorization", getToken());
+}
 
 function sanitizePayload(result){
 	//TODO: for realz

@@ -1,15 +1,17 @@
 var resultDiv, resultZbar, socket, _device, _location, _assetTag, _form;
 
-var IP = '127.0.0.1',
-	PORT= '1337',
-	SERVER_URL = 'http://' + IP + ':' + PORT,
+var HOST = '<HOST>',
+	PORT= null,
+	SERVER_URL = 'http://' + HOST + (PORT ? ':' + PORT : ''),
 	ENDPOINT = '/thing/barcode-scann';
 
-var WEB_APP_TOKEN = '<TOKEN>';
+var WEB_APP_TOKEN = '<OAUTH_TOKEN_HERE>';
+
 
 var isPhoneGap = ! /^http/.test(document.location.protocol);
 
 document.addEventListener("deviceready", init, false);
+// document.addEventListener("deviceready", oauthsetup, false);
 
 //HACK!Prevent scrolling out of view
 document.addEventListener('touchmove', function(e) { e.preventDefault(); }, false);
@@ -31,15 +33,13 @@ function init()
 
 	resultDiv.innerHTML = 'Connecting...';
 
-	_form = document.querySelector('#menagerie');
+	_form = document.querySelector('#main-form');
 
 	_device = $('#device');
 	_location = $('#location');
 	_assetTag = $('#assetTag');
 
-	console.log('URL', SERVER_URL);
-
-	$('#menagerie').submit(function(e){
+	$('#main-form').submit(function(e){
 		e.preventDefault();
 
 		var payload = {
@@ -56,28 +56,44 @@ function init()
 		return false;
 	});
 
-	socket = io(SERVER_URL, {
-            transports:[
-				'polling',
-                'websocket',
-                'htmlfile',
-                'xhr-polling',
-                'jsonp-polling'
-            ]
-        });
+	console.log('URL', SERVER_URL);
 
-    socket.on('connect', function () {
-        console.log('Connected');
-        resultDiv.innerHTML = 'Connected';
-    });
-    socket.on('error', function(e){
-        resultDiv.innerHTML = 'ERROR:' + e.toString();
-    });
+	createSocket(SERVER_URL);
+}
+
+function createSocket(url){
+
+	if(socket) socket.close();
+
+	socket = io(url, {
+		transports:[
+			'polling',
+			'websocket',
+			'htmlfile',
+			'xhr-polling',
+			'jsonp-polling'
+		]
+	});
+
+	socket.on('connect', function () {
+		console.log('Connected');
+		resultDiv.innerHTML = 'Connected';
+	});
+
+	socket.on('error', function(e){
+		resultDiv.innerHTML = 'ERROR:' + e.toString();
+	});
+
 	socket.on('/thing/barcode-scann', function(payload){
 		console.log('UPDATED: ', JSON.stringify(payload));
 		resultDiv.innerHTML = payload.success ? '<p>All GOOD</p>' : '<p>Error :(</p>';
 	});
+
+	window.socket = socket;
 }
+
+
+
 
 function startScan(e) {
 	e.preventDefault();
@@ -88,8 +104,7 @@ function startScan(e) {
 			var s = "Result: " + result.text + "<br/>" +
 			"Format: " + result.format + "<br/>" +
 			"Cancelled: " + result.cancelled;
-            // resultZbar.innerHTML = s;
-            result = sanitizePayload(result);
+			result = sanitizePayload(result);
 			handleReading(result);
 		},
 		function (error) {
@@ -133,19 +148,19 @@ function notifyReading(endpoint, payload){
 
 	socket.emit('/thing/socketes', payload);
 
-    resultDiv.innerHTML = endpoint;
+	resultDiv.innerHTML = endpoint;
 
 	$.ajax({
 		url: endpoint,
 		data: payload,
 		type: "POST",
-        crossDomain: true,
-        dataType: "json",
-        beforeSend : setAuthorizationToken
+		crossDomain: true,
+		dataType: "json",
+		beforeSend : setAuthorizationToken
 	}).done(function(res){
 		console.log('AJAX response: ', JSON.stringify(res));
-        if(res.success) resultDiv.innerHTML = 'Transaction complete';
-        else resultDiv.innerHTML = res.message;
+		if(res.success) resultDiv.innerHTML = 'Transaction complete';
+		else resultDiv.innerHTML = res.message;
 	}).fail(function(e){
 		console.error('ERROR %s', e, JSON.stringify(e));
 		resultDiv.innerHTML = '<h4>Error</h4><br/><code>' + JSON.stringify(e, null, 4) + '</code>';
@@ -157,11 +172,11 @@ function notifyReading(endpoint, payload){
 }
 
 function getToken(){
-    console.log('WEB APP TOKEN', WEB_APP_TOKEN);
-    return "Bearer " + WEB_APP_TOKEN;
+	console.log('WEB APP TOKEN', WEB_APP_TOKEN);
+	return "Bearer " + WEB_APP_TOKEN;
 }
 function setAuthorizationToken(xhr){
-    xhr.setRequestHeader("Authorization", getToken());
+	xhr.setRequestHeader("Authorization", getToken());
 }
 
 function sanitizePayload(result){
@@ -171,4 +186,58 @@ function sanitizePayload(result){
 	// result.text = (result.text || '').replace(/\W/g, '');
 	result.barcode = result.text;
 	return result;
+}
+
+
+
+function oauthsetup(){
+	var authUrl = 'http://things.weworkers.io/login';
+	var authWindow = window.open(authUrl, '_blank', 'location=no,toolbar=no');
+	$(authWindow).on('loadstop', function(e){
+		console.log('LOADSTOP');
+		console.log('e', JSON.stringify(e, null, 4));
+	});
+
+	$(authWindow).on('loaderror', function(e){
+		console.log('LOADERROR');
+		console.log('e', JSON.stringify(e, null, 4));
+	});
+
+	$(authWindow).on('exit', function(e){
+		console.log('EXIT');
+		console.log('e', JSON.stringify(e, null, 4));
+	});
+
+	$(authWindow).on('loadstart', function(e){
+		var url = e.originalEvent.url;
+		var code = /\?code=(.+)$/.exec(url);
+		var error = /\?error=(.+)$/.exec(url);
+
+		if (code || error) {
+			//Always close the browser when match is found
+			authWindow.close();
+			console.log('Close authwindow', code ? code : error);
+		}
+
+		console.log(authWindow.document.title);
+		if (code) {
+			//Exchange the authorization code for an access token
+			$.post('https://accounts.google.com/o/oauth2/token', {
+				code: code[1],
+				client_id: options.client_id,
+				client_secret: options.client_secret,
+				redirect_uri: options.redirect_uri,
+				grant_type: 'authorization_code'
+			}).done(function(data) {
+				deferred.resolve(data);
+			}).fail(function(response) {
+				deferred.reject(response.responseJSON);
+			});
+		} else if (error) {
+			//The user denied access to the app
+			deferred.reject({
+				error: error[1]
+			});
+		}
+	});
 }

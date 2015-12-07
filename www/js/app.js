@@ -47,6 +47,7 @@ function init()
 			location: _location.val(),
 			assetTag: _assetTag.val()
 		};
+
 		var endpoint = SERVER_URL + ENDPOINT;
 		//we send and on success we clear the device field
 		notifyReading(endpoint, payload);
@@ -56,6 +57,24 @@ function init()
 		return false;
 	});
 
+	//Handle options modal window:
+	$(document).on('open.fndtn.reveal', '[data-reveal]', function () {
+		$('[name=url]', '#options-form').val(SERVER_URL);
+		$('[name=token]', '#options-form').val(WEB_APP_TOKEN);
+	});
+
+	//Handle options modal window:
+	$(document).on('close.fndtn.reveal', '[data-reveal]', function () {
+		console.log('CLOSE REVEAL');
+		SERVER_URL = $('[name=url]', '#options-form').val();
+		WEB_APP_TOKEN = $('[name=token]', '#options-form').val();
+		createSocket(SERVER_URL);
+	});
+
+	$('#options-btn').on('click', function(){
+		$('#options-modal').foundation('reveal', 'close');
+	});
+
 	console.log('URL', SERVER_URL);
 
 	createSocket(SERVER_URL);
@@ -63,7 +82,16 @@ function init()
 
 function createSocket(url){
 
-	if(socket) socket.close();
+	if(socket && socket.io.uri === url){
+		if(socket.connected) return console.log('Socket connected');
+	}
+
+	if(socket){
+		socket.close();
+		socket.removeAllListeners();
+		socket.doConnect = true;
+		console.log('Socket reset');
+	}
 
 	socket = io(url, {
 		transports:[
@@ -88,6 +116,11 @@ function createSocket(url){
 		console.log('UPDATED: ', JSON.stringify(payload));
 		resultDiv.innerHTML = payload.success ? '<p>All GOOD</p>' : '<p>Error :(</p>';
 	});
+
+	if(socket.doConnect){
+		socket.connect();
+		console.log('Socket connecting');
+	}
 
 	window.socket = socket;
 }

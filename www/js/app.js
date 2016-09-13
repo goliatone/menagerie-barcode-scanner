@@ -43,7 +43,7 @@ function init()
 		e.preventDefault();
 
 		var payload = {
-			alias: _device.val(),
+			deviceId: _device.val(),
 			location: _location.val(),
 			assetTag: _assetTag.val()
 		};

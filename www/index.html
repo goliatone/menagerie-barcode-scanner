@@ -13,57 +13,121 @@
 </head>
 
 <body>
+
     <div class="content" style="margin-top:23px;">
+
+        <!-- Scan and add tab -->
         <div class="row">
             <div class="small-11 small-centered columns">
                 <h3>Sticker Scanner</h3>
                 <form id="main-form">
-                    <label>Location Id
-                        <input id="location" name="locationId" type="text" placeholder="Location Id" required pattern="^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$" />
+
+                    <label>
+                        Location Id
+                        <input
+                            id="location"
+                            name="locationId"
+                            type="text"
+                            placeholder="Location Id"
+                            required pattern="^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$"
+                        />
                     </label>
-                    <label>MAC Address
-                        <input id="device" name="deviceId" type="text" placeholder="MAC" required pattern="^([0-9A-Fa-f]{2}[:-]?){5}([0-9A-Fa-f]{2})$" />
+
+                    <label>
+                        MAC Address
+                        <input
+                            id="device"
+                            name="deviceId"
+                            type="text"
+                            placeholder="MAC"
+                            required pattern="^([0-9A-Fa-f]{2}[:-]?){5}([0-9A-Fa-f]{2})$"
+                        />
                     </label>
-                    <label>Asset Tag
-                        <input id="assetTag" name="assetId" type="text" placeholder="Asset Tag" required pattern="[0-9]{6}" />
+
+                    <label>
+                        Asset Tag
+                        <input
+                            id="assetTag"
+                            name="assetId"
+                            type="text"
+                            placeholder="Asset Tag"
+                            required pattern="[0-9]{6}"
+                        />
                     </label>
+
                     <div id="toolbar" class="row hidden">
                         <div class="small-6 columns">
-                            <button id="clear" type="reset" class="expand info radius small">Clear</button>
+                            <button
+                                id="clear"
+                                type="reset"
+                                class="expand info radius small"
+                            >
+                                Clear
+                            </button>
                         </div>
                         <div class="small-6 columns">
-                            <button id="submit" type="submit" class="expand small radius">Send</button>
+                            <button
+                                id="submit"
+                                type="submit"
+                                class="expand small radius"
+                            >
+                                Send
+                            </button>
                         </div>
                     </div>
                 </form>
                 <div id="results" class="panel"></div>
                 <button id="startScan" class="radius success expand">Scan</button>
                 <a href="#" data-reveal-id="options-modal">Options</a>
-                <div id="options-modal" class="reveal-modal" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+
+                <div
+                    id="options-modal"
+                    class="reveal-modal"
+                    data-reveal
+                    aria-labelledby="modalTitle"
+                    aria-hidden="true"
+                    role="dialog"
+                >
                     <h2 id="modalTitle">Options</h2>
                     <form id="options-form">
+
                         <div class="row">
                             <div class="large-12 small-12 columns">
                                 <label>OAuth Token
-                                    <input name="token" type="text" placeholder="Token" />
+                                    <input
+                                        name="token"
+                                        type="text"
+                                        placeholder="Token"
+                                    />
                                 </label>
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="large-12 small-12 columns">
                                 <label>Server Url
-                                    <input name="url" type="text" placeholder="Url" />
+                                    <input
+                                        name="url"
+                                        type="text"
+                                        placeholder="Url" />
                                 </label>
                             </div>
                         </div>
-                        <button id="options-btn" type="button" class="expand small radius">Ok</button>
+
+                        <button
+                            id="options-btn"
+                            type="button"
+                            class="expand small radius"
+                        >Ok</button>
                     </form>
                     <a class="close-reveal-modal" aria-label="Close">&#215;</a>
                 </div>
+
             </div>
         </div>
+
+        <!-- Login info modal -->
         <script type="text/javascript" src="cordova.js"></script>
-        <!-- <script type="text/javascript" src="js/sails.io.js"></script> -->
         <script type="text/javascript" src="js/socket.io.js"></script>
         <script type="text/javascript" src="js/jquery.js"></script>
         <script type="text/javascript" src="js/foundation.min.js"></script>
